@@ -21,7 +21,8 @@
 #define  ThreadStartAddress 0x388
 
 
-主要实现了win7（sp1）和win10（20h1），里面有写进程结构的偏移是写死的，需要你根据当前的EPROCESS和ETRHEAD稍微修改一下，采用的是下载符号，传到内核，这样没必要动态定位dbg的部分函数.
+主要实现了win7（sp1）和win10（20h1），里面有些进程结构的偏移是写死的，需要你根据当前的EPROCESS和ETRHEAD稍微修改一下。
+采用的是下载符号，传到内核，这样没必要动态定位dbg的部分函数.
 
 没有完全重写调试体系，主要涉及debugport的地方都重写了
 
