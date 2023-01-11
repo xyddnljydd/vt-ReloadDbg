@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Driver Files">
+      <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
+      <Extensions>inf;inv;inx;mof;mc;</Extensions>
+    </Filter>
+    <Filter Include="vm_">
+      <UniqueIdentifier>{97ae6a68-11b4-4930-b004-e71544f3b1ec}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="vmintrin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KernelDbgStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HookFunc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\CoreHv.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\HvCallback.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\HvComm.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\HvDefine.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\HvEpt.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\HvExitHandle.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\HvInjectException.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\HvMemory.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\HvNative.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\HvPch.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\HvStruct.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\HvUtil.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\Lde.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\PageHook.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+    <ClInclude Include="ShotHv\Ssdt.h">
+      <Filter>vm_</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="vmintrin.asm">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ShotHv\CoreHv.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="ShotHv\HvCallback.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="ShotHv\HvComm.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="ShotHv\HvEpt.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="ShotHv\HvExitHandle.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="ShotHv\HvInjectException.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="ShotHv\HvMemory.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="ShotHv\HvUtil.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="ShotHv\Lde.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="ShotHv\PageHook.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="ShotHv\Ssdt.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="ShotHv\oldDriverEntry.cpp">
+      <Filter>vm_</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dbg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HookFunc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vmintrin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="ShotHv\x64.asm">
+      <Filter>vm_</Filter>
+    </MASM>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,75 @@
+Microsoft (R) Macro Assembler (x64) Version 14.21.27702.2   12/29/22 15:10:34
+vmintrin.asm						     Page 1 - 1
+
+
+ 00000000			.CODE                                                                                                                                                                            
+ 00000000			__vm_call proc
+ 00000000  48/ B8		    mov rax,0CDAEFAEDBBAEBEEFh
+	   CDAEFAEDBBAEBEEF
+ 0000000A  0F 01 C1		    vmcall
+ 0000000D  C3			    ret
+ 0000000E			__vm_call endp
+				
+ 0000000E			__vm_call_ex proc
+ 0000000E  48/ B8		        mov  rax,0CDAEFAEDBBAEBEEFh ; Our vmcall indentitifer
+	   CDAEFAEDBBAEBEEF
+				
+ 00000018  48/ 83 EC 30		        sub rsp, 30h
+ 0000001C  4C/ 89 14 24		        mov qword ptr [rsp],       r10
+ 00000020  4C/ 89 5C 24		        mov qword ptr [rsp + 8h],  r11
+	   08
+ 00000025  4C/ 89 64 24		        mov qword ptr [rsp + 10h], r12
+	   10
+ 0000002A  4C/ 89 6C 24		        mov qword ptr [rsp + 18h], r13
+	   18
+ 0000002F  4C/ 89 74 24		        mov qword ptr [rsp + 20h], r14
+	   20
+ 00000034  4C/ 89 7C 24		        mov qword ptr [rsp + 28h], r15
+	   28
+				
+ 00000039  4C/ 8B 54 24		        mov r10, qword ptr [rsp + 58h]
+	   58
+ 0000003E  4C/ 8B 5C 24		        mov r11, qword ptr [rsp + 60h]
+	   60
+ 00000043  4C/ 8B 64 24		        mov r12, qword ptr [rsp + 68h]
+	   68
+ 00000048  4C/ 8B 6C 24		        mov r13, qword ptr [rsp + 70h]
+	   70
+ 0000004D  4C/ 8B 74 24		        mov r14, qword ptr [rsp + 78h]
+	   78
+ 00000052  4C/ 8B BC 24		        mov r15, qword ptr [rsp + 80h]
+	   00000080
+				
+ 0000005A  0F 01 C1		        vmcall
+ 0000005D  4C/ 8B 14 24		        mov r10, qword ptr [rsp]
+ 00000061  4C/ 8B 5C 24		        mov r11, qword ptr [rsp + 8h]
+	   08
+ 00000066  4C/ 8B 64 24		        mov r12, qword ptr [rsp + 10h]
+	   10
+ 0000006B  4C/ 8B 6C 24		        mov r13, qword ptr [rsp + 18h]
+	   18
+ 00000070  4C/ 8B 74 24		        mov r14, qword ptr [rsp + 20h]
+	   20
+ 00000075  4C/ 8B 7C 24		        mov r15, qword ptr [rsp + 28h]
+	   28
+ 0000007A  48/ 83 C4 30		        add rsp, 30h
+				
+ 0000007E  C3			        ret
+ 0000007F			__vm_call_ex endp
+				
+				END
+Microsoft (R) Macro Assembler (x64) Version 14.21.27702.2   12/29/22 15:10:34
+vmintrin.asm						     Symbols 2 - 1
+
+
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+__vm_call_ex . . . . . . . . . .	P 	 0000000E _TEXT	Length= 00000071 Public
+__vm_call  . . . . . . . . . . .	P 	 00000000 _TEXT	Length= 0000000E Public
+
+	   0 Warnings
+	   0 Errors
