@@ -23,6 +23,7 @@ extern __DbgkpPostFakeProcessCreateMessages DbgkpPostFakeProcessCreateMessages;
 
 extern KSPIN_LOCK g_DebugLock;
 extern DebugInfomation g_Debuginfo;
+extern PFAST_MUTEX DbgkpProcessDebugPortMutex;
 
 
 PVOID 	OriginalDbgkpQueueMessage = NULL;
@@ -126,6 +127,7 @@ BOOLEAN DbgInit()
 	DbgkSendSystemDllMessages = (__DbgkSendSystemDllMessages)g_SymbolsData.DbgkSendSystemDllMessages;
 	DbgkpPostFakeThreadMessages = (__DbgkpPostFakeThreadMessages)g_SymbolsData.DbgkpPostFakeThreadMessages;
 	DbgkpPostFakeProcessCreateMessages = (__DbgkpPostFakeProcessCreateMessages)g_SymbolsData.DbgkpPostFakeProcessCreateMessages;
+	DbgkpProcessDebugPortMutex = (PFAST_MUTEX)g_SymbolsData.DbgkpProcessDebugPortMutex;
 	
 	//初始化调试对象的链表和锁
 	InitializeListHead(&g_Debuginfo.List);

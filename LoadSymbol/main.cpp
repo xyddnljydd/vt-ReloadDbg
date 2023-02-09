@@ -69,6 +69,7 @@ int main()
 	{
 		printf("load Success!\n");
 		printf("g_SymbolsData.NtCreateDebugObject %p \n", g_SymbolsData.NtCreateDebugObject);
+		printf("g_SymbolsData.DbgkpProcessDebugPortMutex %p \n", g_SymbolsData.DbgkpProcessDebugPortMutex);
 		if (openProcExp())
 		{
 			sendData(CTL_CODE(FILE_DEVICE_UNKNOWN, CTL_LOAD_DRIVER, METHOD_BUFFERED, FILE_ANY_ACCESS), &g_SymbolsData, sizeof(SYMBOLS_DATA), NULL, NULL);

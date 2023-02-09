@@ -3,6 +3,8 @@
 extern SYMBOLS_DATA g_SymbolsData;
 extern POBJECT_TYPE* g_DbgkDebugObjectType;
 
+PFAST_MUTEX DbgkpProcessDebugPortMutex;
+
 __DbgkpWakeTarget DbgkpWakeTarget = NULL;
 __DbgkpSendApiMessage DbgkpSendApiMessage = NULL;
 __DbgkpSuppressDbgMsg DbgkpSuppressDbgMsg = NULL;
@@ -198,11 +200,15 @@ NTSTATUS DbgkpSetProcessDebugObject(
 			////这里设置DebugPort，用来测试
 			//PVOID DebugPort__ = GetProcess_DebugPort(Process);
 			//*(ULONG64 *)(DebugPort__) = (ULONG64)DebugObject;
+			ExAcquireFastMutex(DbgkpProcessDebugPortMutex);
 
 			GlobalHeld = TRUE;
 			ObfReferenceObject(LastThread);
 			Thread = (PETHREAD)PsGetNextProcessThread((PEPROCESS)Process, (PETHREAD)LastThread);
 			if (Thread != NULL) {
+
+				ExReleaseFastMutex(DbgkpProcessDebugPortMutex);
+
 				GlobalHeld = FALSE;
 				ObfDereferenceObject(LastThread);
 				Status = DbgkpPostFakeThreadMessages(
@@ -272,6 +278,12 @@ NTSTATUS DbgkpSetProcessDebugObject(
 	}
 
 	ExReleaseFastMutex(&DebugObject->Mutex);
+
+	if (GlobalHeld)
+	{
+		ExReleaseFastMutex(DbgkpProcessDebugPortMutex);
+	}
+
 	if (LastThread != NULL) {
 		ObDereferenceObject(LastThread);
 	}
@@ -431,13 +443,15 @@ NTSTATUS DbgkpQueueMessage(
 		DebugEvent = &StaticDebugEvent;
 		DebugEvent->Flags = Flags;
 
+		ExAcquireFastMutex(DbgkpProcessDebugPortMutex);
 
 		KIRQL OldIrql = {0};
 		KeAcquireSpinLock(&g_DebugLock, &OldIrql);
 		for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 		{
 			PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
-			if (pDebuginfo->SourceProcessId == PsGetCurrentProcessId() || pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
+			//if (pDebuginfo->SourceProcessId == PsGetCurrentProcessId() || pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
+			if(pDebuginfo->TargetProcessId == PsGetProcessId(Process))
 			{
 				DebugObject = pDebuginfo->DebugObject;
 				break;
@@ -467,8 +481,8 @@ NTSTATUS DbgkpQueueMessage(
 	DebugEvent->ClientId.UniqueThread = PsGetThreadId(Thread);
 
 
-	KIRQL irql = KeGetCurrentIrql();//win7 这里可能会报irql bsod，那这里就直接返回
-	if (DebugObject == NULL || irql >= APC_LEVEL)
+	//KIRQL irql = KeGetCurrentIrql();//win7 这里可能会报irql bsod，那这里就直接返回
+	if (DebugObject == NULL/* || irql >= APC_LEVEL*/)
 	{
 		Status = STATUS_PORT_NOT_SET;
 	}
@@ -491,6 +505,8 @@ NTSTATUS DbgkpQueueMessage(
 	}
 
 	if ((Flags & DEBUG_EVENT_NOWAIT) == 0) {
+		ExReleaseFastMutex(DbgkpProcessDebugPortMutex);
+
 		if (NT_SUCCESS(Status)) {
 			KeWaitForSingleObject(
 				&DebugEvent->ContinueEvent,

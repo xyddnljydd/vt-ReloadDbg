@@ -84,6 +84,7 @@ typedef struct _SYMBOLS_DATA {
 	PVOID NtTerminateProcess;
 	PVOID DbgkMapViewOfSection;
 	PVOID DbgkSendSystemDllMessages;
+	PVOID DbgkpProcessDebugPortMutex;
 }SYMBOLS_DATA, * PSYMBOLS_DATA;
 
 

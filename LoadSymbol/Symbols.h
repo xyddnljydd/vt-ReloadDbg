@@ -60,6 +60,7 @@ typedef struct _SYMBOLS_DATA{
 	PVOID NtTerminateProcess;
 	PVOID DbgkMapViewOfSection;
 	PVOID DbgkSendSystemDllMessages;
+	PVOID DbgkpProcessDebugPortMutex;
 }SYMBOLS_DATA, * PSYMBOLS_DATA;
 SYMBOLS_DATA g_SymbolsData = { 0 };
 ULONG g_SymbolsDataSize = sizeof(SYMBOLS_DATA) / sizeof(PVOID);
@@ -268,6 +269,11 @@ BOOLEAN CallBack(char* Name, PVOID Address)
 	else if (strcmp(Name, "DbgkSendSystemDllMessages") == 0)
 	{
 		g_SymbolsData.DbgkSendSystemDllMessages = Address;
+		g_SymbolsDataSize--;
+	}
+	else if (strcmp(Name, "DbgkpProcessDebugPortMutex") == 0)
+	{
+		g_SymbolsData.DbgkpProcessDebugPortMutex = Address;
 		g_SymbolsDataSize--;
 	}
 	if (g_SymbolsDataSize == 0)

@@ -131,6 +131,9 @@ BuildHvEptMemory()
 		return STATUS_MEMORY_NOT_ALLOCATED;
 	}
 
+	// 设置 Eptp
+	auto ntStatus = SetEptp(ContextEntry);
+
 	// 填充 EPT 内存信息
 	ContextEntry->VmxEpt->PML4T[0].Flags = 0;
 	ContextEntry->VmxEpt->PML4T[0].ReadAccess = 1;
@@ -166,7 +169,7 @@ BuildHvEptMemory()
 	}
 
 	// 设置 Eptp
-	auto ntStatus = SetEptp(ContextEntry);
+	//auto ntStatus = SetEptp(ContextEntry);
 
 	return ntStatus;
 }
@@ -242,10 +245,10 @@ SetEptp(
 	{
 		ContextEntry->VmxEptp.MemoryType = MEMORY_TYPE_UNCACHEABLE; // UC(无缓存类型的内存)
 	}
-
+	
 	//if (ia32Eptinfo.fields.support_write_back_memory_type)
 	//{
-	ContextEntry->VmxEptp.MemoryType = MEMORY_TYPE_WRITE_BACK;  // WB(可回写类型的内存, 支持则优先设置)
+		ContextEntry->VmxEptp.MemoryType = MEMORY_TYPE_WRITE_BACK;  // WB(可回写类型的内存, 支持则优先设置)
 	//}
 
 	//if (ia32Eptinfo.fields.support_accessed_and_dirty_flag) // Ept dirty 标志位是否有效
@@ -254,7 +257,7 @@ SetEptp(
 	//}
 	//else
 	//{
-	ContextEntry->VmxEptp.EnableAccessAndDirtyFlags = FALSE;
+		ContextEntry->VmxEptp.EnableAccessAndDirtyFlags = FALSE;
 	//}
 
 	ContextEntry->VmxEptp.PageFrameNumber = MmGetPhysicalAddress(&(ContextEntry->VmxEpt->PML4T[0])).QuadPart / PAGE_SIZE;
