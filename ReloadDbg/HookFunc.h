@@ -8,7 +8,8 @@ typedef struct _DebugInfomation{
 	LIST_ENTRY List;
 	HANDLE SourceProcessId;
 	HANDLE TargetProcessId;
-	HANDLE DebugObjectHandle;
+	//HANDLE DebugObjectHandle;
+	PVOID TargetEPROCESS;
 	DEBUG_OBJECT* DebugObject;
 }DebugInfomation,*PDebugInfomation;
 

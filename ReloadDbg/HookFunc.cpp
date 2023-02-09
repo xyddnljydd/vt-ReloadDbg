@@ -152,9 +152,11 @@ NTSTATUS  NtCreateDebugObject(
 	PDebugInfomation pDebuginfo = (PDebugInfomation)ExAllocatePoolWithTag(NonPagedPool, sizeof(DebugInfomation),'YC');
 	if (pDebuginfo)
 	{
+		memset(pDebuginfo, 0, sizeof(DebugInfomation));
+
 		pDebuginfo->SourceProcessId = PsGetCurrentProcessId();
 		pDebuginfo->DebugObject = DebugObject;
-		pDebuginfo->DebugObjectHandle = Handle;
+		//pDebuginfo->DebugObjectHandle = Handle;
 
 		KIRQL OldIrql = { 0 };
 		KeAcquireSpinLock(&g_DebugLock, &OldIrql);
@@ -325,7 +327,7 @@ VOID  DbgkCreateThread(
 	for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 	{
 		PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
-		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
+		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId() && pDebuginfo->TargetEPROCESS == PsGetCurrentProcess())
 		{
 			isDebug = TRUE;
 			break;
@@ -451,7 +453,7 @@ NTSTATUS DbgkpQueueMessage(
 		{
 			PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
 			//if (pDebuginfo->SourceProcessId == PsGetCurrentProcessId() || pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
-			if(pDebuginfo->TargetProcessId == PsGetProcessId(Process))
+			if(pDebuginfo->TargetProcessId == PsGetProcessId(Process) && pDebuginfo->TargetEPROCESS == Process)
 			{
 				DebugObject = pDebuginfo->DebugObject;
 				break;
@@ -562,7 +564,7 @@ BOOLEAN  DbgkForwardException(
 		for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 		{
 			PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
-			if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
+			if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId() && pDebuginfo->TargetEPROCESS == PsGetCurrentProcess())
 			{
 				DebugObject = pDebuginfo->DebugObject;
 				break;
@@ -652,7 +654,7 @@ VOID DbgkMapViewOfSection(
 	for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 	{
 		PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
-		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
+		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId() && pDebuginfo->TargetEPROCESS == PsGetCurrentProcess())
 		{
 			DebugObject = pDebuginfo->DebugObject;
 			break;
@@ -735,7 +737,7 @@ VOID DbgkUnMapViewOfSection(
 	for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 	{
 		PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
-		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
+		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId() && pDebuginfo->TargetEPROCESS == PsGetCurrentProcess())
 		{
 			DebugObject = pDebuginfo->DebugObject;
 			break;
@@ -814,6 +816,7 @@ NTSTATUS  NtDebugActiveProcess(
 		{
 			DebugObject = pDebuginfo->DebugObject;
 			pDebuginfo->TargetProcessId = PsGetProcessId(Process);
+			pDebuginfo->TargetEPROCESS = Process;
 			break;
 		}
 	}
@@ -854,7 +857,7 @@ VOID KiDispatchException(
 		for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 		{
 			PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
-			if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
+			if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId() && pDebuginfo->TargetEPROCESS == PsGetCurrentProcess())
 			{
 				isDebug = TRUE;
 				break;
@@ -957,6 +960,7 @@ NTSTATUS NtCreateUserProcess(
 
 			HANDLE target_pid = PsGetProcessId(temp_process);
 			TmpDebuginfo->TargetProcessId = target_pid;
+			TmpDebuginfo->TargetEPROCESS = temp_process;
 			PVOID DebugPort__ = GetProcess_DebugPort(temp_process);
 			*(ULONG64 *)(DebugPort__) = 0;
 			DbgkpMarkProcessPeb(temp_process);
