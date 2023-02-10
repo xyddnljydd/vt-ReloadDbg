@@ -199,7 +199,7 @@ NTSTATUS DbgkpSetProcessDebugObject(
 	if (NT_SUCCESS(Status)) {
 		while (TRUE) {
 
-			////ÕâÀïÉèÖÃDebugPort£¬ÓÃÀ´²âÊÔ
+			////è¿™é‡Œè®¾ç½®DebugPortï¼Œç”¨æ¥æµ‹è¯•
 			//PVOID DebugPort__ = GetProcess_DebugPort(Process);
 			//*(ULONG64 *)(DebugPort__) = (ULONG64)DebugObject;
 			ExAcquireFastMutex(DbgkpProcessDebugPortMutex);
@@ -296,7 +296,7 @@ NTSTATUS DbgkpSetProcessDebugObject(
 		DbgkpWakeTarget(DebugEvent);
 	}
 
-	//ÕâÀïÓÃÀ´ÉèÖÃBeingDebuggedµÄ
+	//è¿™é‡Œç”¨æ¥è®¾ç½®BeingDebuggedçš„
 	//if (NT_SUCCESS(Status)) {
 	// DbgkpMarkProcessPeb(Process);
 	//}
@@ -338,7 +338,7 @@ VOID  DbgkCreateThread(
 	if (isDebug)
 	{
 		PVOID ProFlag = GetProcess_ProcessFlags(Process);
-		ULONG OldFlags = RtlInterlockedSetBits(ProFlag, 0x400001);	//RtlInterlockedSetBits(&Process->Flags, 0x400001);Ö®Ç°Õâ¸öbugÔÚwin7¾Í»á³öÏÖ£¬åøÕÒ°ëÌì
+		ULONG OldFlags = RtlInterlockedSetBits(ProFlag, 0x400001);	//RtlInterlockedSetBits(&Process->Flags, 0x400001);ä¹‹å‰è¿™ä¸ªbugåœ¨win7å°±ä¼šå‡ºçŽ°ï¼Œå±®æ‰¾åŠå¤©
 		if ((OldFlags & PS_PROCESS_FLAGS_CREATE_REPORTED) == 0)
 		{
 			CreateThreadArgs = &m.u.CreateProcessInfo.InitialThread;
@@ -483,7 +483,7 @@ NTSTATUS DbgkpQueueMessage(
 	DebugEvent->ClientId.UniqueThread = PsGetThreadId(Thread);
 
 
-	//KIRQL irql = KeGetCurrentIrql();//win7 ÕâÀï¿ÉÄÜ»á±¨irql bsod£¬ÄÇÕâÀï¾ÍÖ±½Ó·µ»Ø
+	//KIRQL irql = KeGetCurrentIrql();//win7 è¿™é‡Œå¯èƒ½ä¼šæŠ¥irql bsodï¼Œé‚£è¿™é‡Œå°±ç›´æŽ¥è¿”å›ž
 	if (DebugObject == NULL/* || irql >= APC_LEVEL*/)
 	{
 		Status = STATUS_PORT_NOT_SET;
@@ -748,7 +748,7 @@ VOID DbgkUnMapViewOfSection(
 	if (!DebugObject)
 		return;
 
-	//ÕâÀïÊ¡ÂÔÁËÏµÍ³½ø³ÌºÍ¹Ò¿¿½ø³ÌµÄÅÐ¶Ï
+	//è¿™é‡Œçœç•¥äº†ç³»ç»Ÿè¿›ç¨‹å’ŒæŒ‚é è¿›ç¨‹çš„åˆ¤æ–­
 	Teb = (PTEB)PsGetThreadTeb(CurrentThread);
 
 	if (Teb != NULL && Process == CurrentProcess)
@@ -882,7 +882,7 @@ VOID KiDispatchException(
 
 			if (DbgkForwardException(ExceptionRecord, TRUE, FALSE))
 			{
-				//int 2d ²»·µ»Ø£¬Ö±½ÓÏÂ·¢Òì³£µ½Òì³£´¦Àí
+				//int 2d ä¸è¿”å›žï¼Œç›´æŽ¥ä¸‹å‘å¼‚å¸¸åˆ°å¼‚å¸¸å¤„ç†
 				if (*(PUSHORT)((ULONG64)(TrapFrame->Rip) - 3) != 0x2DCD)//int 2d
 					return;
 			}
@@ -958,17 +958,19 @@ NTSTATUS NtCreateUserProcess(
 			if (!NT_SUCCESS(status))
 				return status;
 
-			HANDLE target_pid = PsGetProcessId(temp_process);
-			TmpDebuginfo->TargetProcessId = target_pid;
-			TmpDebuginfo->TargetEPROCESS = temp_process;
 			PVOID DebugPort__ = GetProcess_DebugPort(temp_process);
-			*(ULONG64 *)(DebugPort__) = 0;
-			DbgkpMarkProcessPeb(temp_process);
+			if (*(ULONG64*)(DebugPort__) != 0)
+			{
+				HANDLE target_pid = PsGetProcessId(temp_process);
+				TmpDebuginfo->TargetProcessId = target_pid;
+				TmpDebuginfo->TargetEPROCESS = temp_process;
 
-			PVOID Flags = GetProcess_ProcessFlags(temp_process);
-			*(PULONG64)Flags &= ~PS_PROCESS_FLAGS_NO_DEBUG_INHERIT;
+				*(ULONG64*)(DebugPort__) = 0;
+				DbgkpMarkProcessPeb(temp_process);
 
-			return status;
+				PVOID Flags = GetProcess_ProcessFlags(temp_process);
+				*(PULONG64)Flags &= ~PS_PROCESS_FLAGS_NO_DEBUG_INHERIT;
+			}
 		}
 	}
 	return status;
