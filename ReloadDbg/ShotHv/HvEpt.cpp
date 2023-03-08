@@ -246,19 +246,19 @@ SetEptp(
 		ContextEntry->VmxEptp.MemoryType = MEMORY_TYPE_UNCACHEABLE; // UC(无缓存类型的内存)
 	}
 	
-	//if (ia32Eptinfo.fields.support_write_back_memory_type)
-	//{
+	if (ia32Eptinfo.fields.support_write_back_memory_type)
+	{
 		ContextEntry->VmxEptp.MemoryType = MEMORY_TYPE_WRITE_BACK;  // WB(可回写类型的内存, 支持则优先设置)
-	//}
+	}
 
-	//if (ia32Eptinfo.fields.support_accessed_and_dirty_flag) // Ept dirty 标志位是否有效
-	//{
-	//	ContextEntry->VmxEptp.EnableAccessAndDirtyFlags = TRUE;
-	//}
-	//else
-	//{
+	if (ia32Eptinfo.fields.support_accessed_and_dirty_flag) // Ept dirty 标志位是否有效
+	{
+		ContextEntry->VmxEptp.EnableAccessAndDirtyFlags = TRUE;
+	}
+	else
+	{
 		ContextEntry->VmxEptp.EnableAccessAndDirtyFlags = FALSE;
-	//}
+	}
 
 	ContextEntry->VmxEptp.PageFrameNumber = MmGetPhysicalAddress(&(ContextEntry->VmxEpt->PML4T[0])).QuadPart / PAGE_SIZE;
 

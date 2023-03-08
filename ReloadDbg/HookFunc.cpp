@@ -199,7 +199,7 @@ NTSTATUS DbgkpSetProcessDebugObject(
 	if (NT_SUCCESS(Status)) {
 		while (TRUE) {
 
-			////è¿™é‡Œè®¾ç½®DebugPortï¼Œç”¨æ¥æµ‹è¯•
+			////ÕâÀïÉèÖÃDebugPort£¬ÓÃÀ´²âÊÔ
 			//PVOID DebugPort__ = GetProcess_DebugPort(Process);
 			//*(ULONG64 *)(DebugPort__) = (ULONG64)DebugObject;
 			ExAcquireFastMutex(DbgkpProcessDebugPortMutex);
@@ -296,7 +296,7 @@ NTSTATUS DbgkpSetProcessDebugObject(
 		DbgkpWakeTarget(DebugEvent);
 	}
 
-	//è¿™é‡Œç”¨æ¥è®¾ç½®BeingDebuggedçš„
+	//ÕâÀïÓÃÀ´ÉèÖÃBeingDebuggedµÄ
 	//if (NT_SUCCESS(Status)) {
 	// DbgkpMarkProcessPeb(Process);
 	//}
@@ -327,7 +327,7 @@ VOID  DbgkCreateThread(
 	for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 	{
 		PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
-		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId() && pDebuginfo->TargetEPROCESS == PsGetCurrentProcess())
+		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
 		{
 			isDebug = TRUE;
 			break;
@@ -338,7 +338,7 @@ VOID  DbgkCreateThread(
 	if (isDebug)
 	{
 		PVOID ProFlag = GetProcess_ProcessFlags(Process);
-		ULONG OldFlags = RtlInterlockedSetBits(ProFlag, 0x400001);	//RtlInterlockedSetBits(&Process->Flags, 0x400001);ä¹‹å‰è¿™ä¸ªbugåœ¨win7å°±ä¼šå‡ºçŽ°ï¼Œå±®æ‰¾åŠå¤©
+		ULONG OldFlags = RtlInterlockedSetBits(ProFlag, 0x400001);	//RtlInterlockedSetBits(&Process->Flags, 0x400001);Ö®Ç°Õâ¸öbugÔÚwin7¾Í»á³öÏÖ£¬åøÕÒ°ëÌì
 		if ((OldFlags & PS_PROCESS_FLAGS_CREATE_REPORTED) == 0)
 		{
 			CreateThreadArgs = &m.u.CreateProcessInfo.InitialThread;
@@ -453,7 +453,7 @@ NTSTATUS DbgkpQueueMessage(
 		{
 			PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
 			//if (pDebuginfo->SourceProcessId == PsGetCurrentProcessId() || pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
-			if(pDebuginfo->TargetProcessId == PsGetProcessId(Process) && pDebuginfo->TargetEPROCESS == Process)
+			if(pDebuginfo->TargetProcessId == PsGetProcessId(Process))
 			{
 				DebugObject = pDebuginfo->DebugObject;
 				break;
@@ -483,7 +483,7 @@ NTSTATUS DbgkpQueueMessage(
 	DebugEvent->ClientId.UniqueThread = PsGetThreadId(Thread);
 
 
-	//KIRQL irql = KeGetCurrentIrql();//win7 è¿™é‡Œå¯èƒ½ä¼šæŠ¥irql bsodï¼Œé‚£è¿™é‡Œå°±ç›´æŽ¥è¿”å›ž
+	//KIRQL irql = KeGetCurrentIrql();//win7 ÕâÀï¿ÉÄÜ»á±¨irql bsod£¬ÄÇÕâÀï¾ÍÖ±½Ó·µ»Ø
 	if (DebugObject == NULL/* || irql >= APC_LEVEL*/)
 	{
 		Status = STATUS_PORT_NOT_SET;
@@ -564,7 +564,7 @@ BOOLEAN  DbgkForwardException(
 		for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 		{
 			PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
-			if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId() && pDebuginfo->TargetEPROCESS == PsGetCurrentProcess())
+			if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
 			{
 				DebugObject = pDebuginfo->DebugObject;
 				break;
@@ -654,7 +654,7 @@ VOID DbgkMapViewOfSection(
 	for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 	{
 		PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
-		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId() && pDebuginfo->TargetEPROCESS == PsGetCurrentProcess())
+		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
 		{
 			DebugObject = pDebuginfo->DebugObject;
 			break;
@@ -737,7 +737,7 @@ VOID DbgkUnMapViewOfSection(
 	for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 	{
 		PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
-		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId() && pDebuginfo->TargetEPROCESS == PsGetCurrentProcess())
+		if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
 		{
 			DebugObject = pDebuginfo->DebugObject;
 			break;
@@ -748,7 +748,7 @@ VOID DbgkUnMapViewOfSection(
 	if (!DebugObject)
 		return;
 
-	//è¿™é‡Œçœç•¥äº†ç³»ç»Ÿè¿›ç¨‹å’ŒæŒ‚é è¿›ç¨‹çš„åˆ¤æ–­
+	//ÕâÀïÊ¡ÂÔÁËÏµÍ³½ø³ÌºÍ¹Ò¿¿½ø³ÌµÄÅÐ¶Ï
 	Teb = (PTEB)PsGetThreadTeb(CurrentThread);
 
 	if (Teb != NULL && Process == CurrentProcess)
@@ -816,7 +816,6 @@ NTSTATUS  NtDebugActiveProcess(
 		{
 			DebugObject = pDebuginfo->DebugObject;
 			pDebuginfo->TargetProcessId = PsGetProcessId(Process);
-			pDebuginfo->TargetEPROCESS = Process;
 			break;
 		}
 	}
@@ -857,7 +856,7 @@ VOID KiDispatchException(
 		for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 		{
 			PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
-			if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId() && pDebuginfo->TargetEPROCESS == PsGetCurrentProcess())
+			if (pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
 			{
 				isDebug = TRUE;
 				break;
@@ -882,7 +881,7 @@ VOID KiDispatchException(
 
 			if (DbgkForwardException(ExceptionRecord, TRUE, FALSE))
 			{
-				//int 2d ä¸è¿”å›žï¼Œç›´æŽ¥ä¸‹å‘å¼‚å¸¸åˆ°å¼‚å¸¸å¤„ç†
+				//int 2d ²»·µ»Ø£¬Ö±½ÓÏÂ·¢Òì³£µ½Òì³£´¦Àí
 				if (*(PUSHORT)((ULONG64)(TrapFrame->Rip) - 3) != 0x2DCD)//int 2d
 					return;
 			}
@@ -963,7 +962,6 @@ NTSTATUS NtCreateUserProcess(
 			{
 				HANDLE target_pid = PsGetProcessId(temp_process);
 				TmpDebuginfo->TargetProcessId = target_pid;
-				TmpDebuginfo->TargetEPROCESS = temp_process;
 
 				*(ULONG64*)(DebugPort__) = 0;
 				DbgkpMarkProcessPeb(temp_process);
@@ -971,6 +969,7 @@ NTSTATUS NtCreateUserProcess(
 				PVOID Flags = GetProcess_ProcessFlags(temp_process);
 				*(PULONG64)Flags &= ~PS_PROCESS_FLAGS_NO_DEBUG_INHERIT;
 			}
+
 		}
 	}
 	return status;
