@@ -1,6 +1,6 @@
 #include"dbg.h"
 #include"HookFunc.h"
-
+#include"Lde.h"
 
 extern SYMBOLS_DATA g_SymbolsData;
 extern __DbgkpWakeTarget DbgkpWakeTarget;
@@ -92,6 +92,107 @@ BOOLEAN HookDbgkDebugObjectType()
 	return TRUE;
 }
 
+HOOKLIST g_hookList[32] = { 0 };
+ULONG g_count = 0;
+VOID HookFunction(PVOID pFunc,PVOID hookAddress,PVOID *outAddress)
+{
+	PUCHAR   codePage = NULL;
+	BOOLEAN  isSamePage = FALSE;
+	for(ULONG i=0;i< g_count;i++)
+	{
+		if (PAGE_ALIGN(pFunc) == PAGE_ALIGN(g_hookList[i].pFunc) && g_hookList[i].codePage)
+		{
+			codePage = (PUCHAR)g_hookList[i].codePage;
+			isSamePage = TRUE;
+			break;
+		}
+	}
+
+	PHYSICAL_ADDRESS phys = { 0 };
+	phys.QuadPart = MAXULONG64;
+	if(!codePage)
+		codePage = (PUCHAR)MmAllocateContiguousMemory(PAGE_SIZE, phys);
+	if (!codePage)
+		return;
+
+	if(!isSamePage)
+		RtlCopyMemory(codePage, PAGE_ALIGN(pFunc), PAGE_SIZE);
+	UCHAR JmpCode[] = "\x48\xB8\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\xFF\xE0";
+	RtlCopyMemory(JmpCode + 2, &hookAddress, sizeof(ULONG64));
+	ULONG_PTR PageOffset = (ULONG_PTR)pFunc - (ULONG_PTR)PAGE_ALIGN(pFunc);
+	RtlCopyMemory(codePage + PageOffset, JmpCode, sizeof(JmpCode));
+
+	ULONG HookSize = GetWriteCodeLen(pFunc, sizeof(JmpCode));
+	*(PULONG64)(JmpCode + 2) = (ULONG64)pFunc + HookSize;
+	ULONG64 OriFunc = (ULONG64)ExAllocatePoolWithTag(NonPagedPool, HookSize + sizeof(JmpCode), 'yc');
+	if (OriFunc)
+	{
+		RtlCopyMemory((PVOID)OriFunc, pFunc, HookSize);
+		RtlCopyMemory((PVOID)(OriFunc + HookSize), &JmpCode, sizeof(JmpCode));
+
+		if (!isSamePage)
+			g_hookList[g_count].codePage = codePage;
+
+		g_hookList[g_count].pFunc = pFunc;
+		g_hookList[g_count].orgFunc = (PVOID)OriFunc;
+
+		*outAddress = (PVOID)OriFunc;
+		g_count++;
+	}
+	else
+		MmFreeContiguousMemory(codePage);
+}
+
+VOID ActiveHook()
+{
+	for (ULONG i = 0; i < g_count; i++)
+	{
+		if (g_hookList[i].codePage)
+		{
+			hv::hypercall_input Input = { 0 };
+			Input.code = hv::hypercall_install_ept_hook;
+			Input.key = hv::hypercall_key;
+			Input.args[0] = MmGetPhysicalAddress(g_hookList[i].pFunc).QuadPart;
+			Input.args[1] = MmGetPhysicalAddress(g_hookList[i].codePage).QuadPart;
+			for (unsigned long i = 0; i < KeQueryActiveProcessorCount(nullptr); ++i) {
+				auto const orig_affinity = KeSetSystemAffinityThreadEx(1ull << i);
+				hv::vmx_vmcall(Input);
+				KeRevertToUserAffinityThreadEx(orig_affinity);
+			}
+		}
+	}
+
+
+ }
+
+VOID UnHookFunc(PVOID pFunc)
+{
+	hv::hypercall_input Input = { 0 };
+	Input.code = hv::hypercall_remove_ept_hook;
+	Input.key = hv::hypercall_key;
+	Input.args[0] = MmGetPhysicalAddress(pFunc).QuadPart;
+	for (unsigned long i = 0; i < KeQueryActiveProcessorCount(nullptr); ++i) {
+		auto const orig_affinity = KeSetSystemAffinityThreadEx(1ull << i);
+		hv::vmx_vmcall(Input);
+		KeRevertToUserAffinityThreadEx(orig_affinity);
+	}
+}
+
+void UnHookFreeAddress()
+{
+	for (ULONG i = 0; i < g_count; i++)
+	{
+		if (g_hookList[i].codePage)
+		{
+			UnHookFunc(g_hookList[i].pFunc);
+			MmFreeContiguousMemory(g_hookList[i].codePage);
+		}
+		ExFreePool(g_hookList[i].orgFunc);
+	}
+	g_count = 0;
+	memset(g_hookList,0,sizeof(HOOKLIST)*32);
+}
+
 /*
 	win7-win10下
 	会用到debugport的函数
@@ -133,33 +234,19 @@ BOOLEAN DbgInit()
 	InitializeListHead(&g_Debuginfo.List);
 	KeInitializeSpinLock(&g_DebugLock);
 
-	//这里开始hook函数
-#ifdef WINVM
-	PHHook(g_SymbolsData.DbgkCreateThread, DbgkCreateThread, (PVOID*)&OriginalDbgkCreateThread);
-	PHHook(g_SymbolsData.DbgkpQueueMessage, DbgkpQueueMessage, (PVOID*)&OriginalDbgkpQueueMessage);
-	PHHook(g_SymbolsData.NtTerminateProcess, NtTerminateProcess, (PVOID*)&OrignalNtTerminateProcess);
-	PHHook(g_SymbolsData.NtCreateUserProcess, NtCreateUserProcess, (PVOID*)&OrignalNtCreateUserProcess);
-	PHHook(g_SymbolsData.KiDispatchException, KiDispatchException, (PVOID*)&OrignalKiDispatchException);
-	PHHook(g_SymbolsData.NtCreateDebugObject, NtCreateDebugObject, (PVOID*)&OriginalNtCreateDebugObject);
-	PHHook(g_SymbolsData.NtDebugActiveProcess, NtDebugActiveProcess, (PVOID*)&OriginalNtDebugActiveProcess);
-	PHHook(g_SymbolsData.DbgkForwardException, DbgkForwardException, (PVOID*)&OriginalDbgkForwardException);
-	PHHook(g_SymbolsData.DbgkMapViewOfSection, DbgkMapViewOfSection, (PVOID*)&OriginalDbgkMapViewOfSection);
-	PHHook(g_SymbolsData.DbgkUnMapViewOfSection, DbgkUnMapViewOfSection, (PVOID*)&OriginalDbgkUnMapViewOfSection);
-	PHHook(g_SymbolsData.DbgkpSetProcessDebugObject, DbgkpSetProcessDebugObject, (PVOID*)&OriginalDbgkpSetProcessDebugObject);
-	PHActivateHooks();
-#else
-	hook_function(g_SymbolsData.DbgkCreateThread, DbgkCreateThread, (PVOID*)&OriginalDbgkCreateThread);
-	hook_function(g_SymbolsData.DbgkpQueueMessage, DbgkpQueueMessage, (PVOID*)&OriginalDbgkpQueueMessage);
-	hook_function(g_SymbolsData.NtTerminateProcess, NtTerminateProcess, (PVOID*)&OrignalNtTerminateProcess);
-	hook_function(g_SymbolsData.NtCreateUserProcess, NtCreateUserProcess, (PVOID*)&OrignalNtCreateUserProcess);
-	hook_function(g_SymbolsData.KiDispatchException, KiDispatchException, (PVOID*)&OrignalKiDispatchException);
-	hook_function(g_SymbolsData.NtCreateDebugObject, NtCreateDebugObject, (PVOID*)&OriginalNtCreateDebugObject);
-	hook_function(g_SymbolsData.NtDebugActiveProcess, NtDebugActiveProcess, (PVOID*)&OriginalNtDebugActiveProcess);
-	hook_function(g_SymbolsData.DbgkForwardException, DbgkForwardException, (PVOID*)&OriginalDbgkForwardException);
-	hook_function(g_SymbolsData.DbgkMapViewOfSection, DbgkMapViewOfSection, (PVOID*)&OriginalDbgkMapViewOfSection);
-	hook_function(g_SymbolsData.DbgkUnMapViewOfSection, DbgkUnMapViewOfSection, (PVOID*)&OriginalDbgkUnMapViewOfSection);
-	hook_function(g_SymbolsData.DbgkpSetProcessDebugObject, DbgkpSetProcessDebugObject, (PVOID*)&OriginalDbgkpSetProcessDebugObject);
-#endif
+	//这里开始hook函数==>被hook的函数不能在两个页面之间
+	HookFunction(g_SymbolsData.DbgkCreateThread, DbgkCreateThread, (PVOID*)& OriginalDbgkCreateThread);
+	HookFunction(g_SymbolsData.DbgkpQueueMessage, DbgkpQueueMessage, (PVOID*)& OriginalDbgkpQueueMessage);
+	HookFunction(g_SymbolsData.NtTerminateProcess, NtTerminateProcess, (PVOID*)& OrignalNtTerminateProcess);
+	HookFunction(g_SymbolsData.NtCreateUserProcess, NtCreateUserProcess, (PVOID*)& OrignalNtCreateUserProcess);
+	HookFunction(g_SymbolsData.KiDispatchException, KiDispatchException, (PVOID*)& OrignalKiDispatchException);
+	HookFunction(g_SymbolsData.NtCreateDebugObject, NtCreateDebugObject, (PVOID*)& OriginalNtCreateDebugObject);
+	HookFunction(g_SymbolsData.NtDebugActiveProcess, NtDebugActiveProcess, (PVOID*)& OriginalNtDebugActiveProcess);
+	HookFunction(g_SymbolsData.DbgkForwardException, DbgkForwardException, (PVOID*)& OriginalDbgkForwardException);
+	HookFunction(g_SymbolsData.DbgkMapViewOfSection, DbgkMapViewOfSection, (PVOID*)& OriginalDbgkMapViewOfSection);
+	HookFunction(g_SymbolsData.DbgkUnMapViewOfSection, DbgkUnMapViewOfSection, (PVOID*)& OriginalDbgkUnMapViewOfSection);
+	HookFunction(g_SymbolsData.DbgkpSetProcessDebugObject, DbgkpSetProcessDebugObject, (PVOID*)& OriginalDbgkpSetProcessDebugObject);
+	ActiveHook();
 
 	if (!HookDbgkDebugObjectType())
 		return FALSE;
@@ -168,14 +255,11 @@ BOOLEAN DbgInit()
 	return TRUE;
 }
 
-
 BOOLEAN UnHookFuncs()
 {
-#ifdef WINVM
-	DisableIntelVT();
-#else
-	unhook_all_functions();
-#endif
-	
+	UnHookFreeAddress();
+	hv::stop();
+	DbgPrint("[hv] Devirtualized the system.\n");
+	DbgPrint("[hv] Driver unloaded.\n");
 	return TRUE;
 }

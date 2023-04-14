@@ -1,11 +1,8 @@
 #pragma once
 #include "vmintrin.h"
-
-#ifdef WINVM
-#include "ShotHv/HvPch.h"
-#else
-#endif
-
+#include "./hv/hv/hv.h"
 
 BOOLEAN DbgInit();
 BOOLEAN UnHookFuncs();
+
+

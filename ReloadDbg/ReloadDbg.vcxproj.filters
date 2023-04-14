@@ -17,8 +17,8 @@
       <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
       <Extensions>inf;inv;inx;mof;mc;</Extensions>
     </Filter>
-    <Filter Include="vm_">
-      <UniqueIdentifier>{97ae6a68-11b4-4930-b004-e71544f3b1ec}</UniqueIdentifier>
+    <Filter Include="Source Files\hv">
+      <UniqueIdentifier>{891f04a0-e006-4a3c-a1e4-9f5ea3b1e654}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -28,100 +28,95 @@
     <ClInclude Include="dbg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KernelDbgStruct.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HookFunc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\CoreHv.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="KernelDbgStruct.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\HvCallback.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\arch.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\HvComm.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\ept.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\HvDefine.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\exception-routines.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\HvEpt.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\exit-handlers.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\HvExitHandle.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\gdt.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\HvInjectException.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\guest-context.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\HvMemory.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\hv.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\HvNative.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\hypercalls.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\HvPch.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\ia32.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\HvStruct.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\ia32.hpp">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\HvUtil.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\ia32_compact.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\Lde.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\ia32_defines_only.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\PageHook.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\idt.h">
+      <Filter>Source Files\hv</Filter>
     </ClInclude>
-    <ClInclude Include="ShotHv\Ssdt.h">
-      <Filter>vm_</Filter>
+    <ClInclude Include="hv\hv\interrupt-handlers.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\introspection.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\logger.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\mm.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\mtrr.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\page-tables.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\segment.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\spin-lock.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\timing.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\trap-frame.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\vcpu.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\vmcs.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="hv\hv\vmx.h">
+      <Filter>Source Files\hv</Filter>
+    </ClInclude>
+    <ClInclude Include="Lde.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="vmintrin.asm">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="ShotHv\CoreHv.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
-    <ClCompile Include="ShotHv\HvCallback.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
-    <ClCompile Include="ShotHv\HvComm.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
-    <ClCompile Include="ShotHv\HvEpt.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
-    <ClCompile Include="ShotHv\HvExitHandle.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
-    <ClCompile Include="ShotHv\HvInjectException.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
-    <ClCompile Include="ShotHv\HvMemory.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
-    <ClCompile Include="ShotHv\HvUtil.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
-    <ClCompile Include="ShotHv\Lde.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
-    <ClCompile Include="ShotHv\PageHook.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
-    <ClCompile Include="ShotHv\Ssdt.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
-    <ClCompile Include="ShotHv\oldDriverEntry.cpp">
-      <Filter>vm_</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -131,13 +126,75 @@
     <ClCompile Include="HookFunc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vmintrin.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="hv\hv\ept.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\exit-handlers.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\gdt.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\hv.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\hypercalls.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\idt.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\introspection.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\logger.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\mm.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\mtrr.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\page-tables.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\segment.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\timing.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\vcpu.cpp">
+      <Filter>Source Files\hv</Filter>
+    </ClCompile>
+    <ClCompile Include="hv\hv\vmcs.cpp">
+      <Filter>Source Files\hv</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="ShotHv\x64.asm">
-      <Filter>vm_</Filter>
+    <MASM Include="hv\hv\arch.asm">
+      <Filter>Source Files\hv</Filter>
     </MASM>
+    <MASM Include="hv\hv\exception-routines.asm">
+      <Filter>Source Files\hv</Filter>
+    </MASM>
+    <MASM Include="hv\hv\interrupt-handlers.asm">
+      <Filter>Source Files\hv</Filter>
+    </MASM>
+    <MASM Include="hv\hv\vm-exit.asm">
+      <Filter>Source Files\hv</Filter>
+    </MASM>
+    <MASM Include="hv\hv\vm-launch.asm">
+      <Filter>Source Files\hv</Filter>
+    </MASM>
+    <MASM Include="hv\hv\vmx.asm">
+      <Filter>Source Files\hv</Filter>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="hv\hv\vmx.inl">
+      <Filter>Source Files\hv</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -4,24 +4,20 @@ SYMBOLS_DATA g_SymbolsData = { 0 };
 
 NTSTATUS VmTest()
 {
+	if (!hv::start()) {
+		DbgPrint("[hv] Failed to virtualize system.\n");
+		return STATUS_HV_OPERATION_FAILED;
+	}
 
-#ifdef WINVM
-	NTSTATUS ntStatus = EnableIntelVT();
-	if (!NT_SUCCESS(ntStatus)) {
-		return STATUS_UNSUCCESSFUL;
-	}
-#else
-	__try 
-	{
-		if (!test_vmcall())
-			return STATUS_UNSUCCESSFUL;
-	}
-	__except(EXCEPTION_EXECUTE_HANDLER)
-	{
-		return STATUS_UNSUCCESSFUL;
-	}
-#endif
+	//ping test
+	hv::hypercall_input input;
+	input.code = hv::hypercall_ping;
+	input.key = hv::hypercall_key;
 
+	if (hv::vmx_vmcall(input) == hv::hypervisor_signature)
+		DbgPrint("[client] Hypervisor signature matches.\n");
+	else
+		DbgPrint("[client] Failed to ping hypervisor!\n");
 	return STATUS_SUCCESS;
 }
 

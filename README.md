@@ -1,8 +1,8 @@
 # vt-ReloadDbg
 
-实现
+## 实现
 
-这里需要自己去稍微修改一下
+下面的结构需要自己去稍微修改一下
 
 #define  Thread_CrossThreadFlags 0x448
 
@@ -20,19 +20,19 @@
 
 #define  ThreadStartAddress 0x388
 
+主要实现了win7（sp1）和win10（20h1），里面这些进程结构的偏移是写死的，需要你根据当前的Windows版本修改，其他地方到没什么需要修改的。
 
-主要实现了win7（sp1）和win10（20h1），里面有些进程结构的偏移是写死的，需要你根据当前的EPROCESS和ETRHEAD稍微修改一下。
-采用的是下载符号，传到内核，这样没必要动态定位dbg的部分函数.
+## 说明
 
-没有完全重写调试体系，主要涉及debugport的地方都重写了
+采用的是下载符号，传到内核，这样没必要动态定位dbg的部分函数，需要先加载驱动，在执行LoadSymbol.exe，执行的时候需要dbghelp.dll和symsrv.dll的依赖。
 
-vt部分
+没有完全重写调试体系，主要涉及debugport的地方都重写了。
 
-hook函数有airhv版本，建议编译mini版本，非mini版本中部分反调试出现r3查询idt而引发的irql错误
+## vt部分
 
-同时也内嵌了一个vt，用的是ShotHv，这里对里面的ept和cr3做了部分修改
+由于各种vt检测的缘故，这里替换vt为jono大佬写的，处理的已经很完善了。win7不支持性能控制器，会出现BSOD，这里把win7下的IA32_PERF_GLOBAL_CTRL给注释掉。Hook函数原作者没写，但提供了ept的替换页表，简单的实现了hook函数，但不支持跨页。
 
-参考
+## 参考
 
 1.https://bbs.kanxue.com/thread-260034-1.htm
 
@@ -40,4 +40,4 @@ hook函数有airhv版本，建议编译mini版本，非mini版本中部分反调
 
 3.https://github.com/DragonQuestHero/Kernel-Anit-Anit-Debug-Plugins
 
-4.https://github.com/qq1045551070/ShotHv
+4.https://github.com/jonomango/hv

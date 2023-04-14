@@ -149,7 +149,7 @@ NTSTATUS  NtCreateDebugObject(
 		status = GetExceptionCode();
 	}
 
-	PDebugInfomation pDebuginfo = (PDebugInfomation)ExAllocatePoolWithTag(NonPagedPool, sizeof(DebugInfomation),'YC');
+	PDebugInfomation pDebuginfo = (PDebugInfomation)ExAllocatePoolWithTag(NonPagedPool, sizeof(DebugInfomation), 'YC');
 	if (pDebuginfo)
 	{
 		memset(pDebuginfo, 0, sizeof(DebugInfomation));
@@ -240,7 +240,7 @@ NTSTATUS DbgkpSetProcessDebugObject(
 		}
 	}
 
-	for (Entry = DebugObject->EventList.Flink;Entry != &DebugObject->EventList;) {
+	for (Entry = DebugObject->EventList.Flink; Entry != &DebugObject->EventList;) {
 		DebugEvent = CONTAINING_RECORD(Entry, DEBUG_EVENT, EventList);
 		Entry = Entry->Flink;
 
@@ -262,7 +262,7 @@ NTSTATUS DbgkpSetProcessDebugObject(
 					}
 					DebugEvent->BackoutThread = NULL;
 					PVOID CrossThreadFlags = GetThread_CrossThreadFlags(Thread);
-					RtlInterlockedSetBitsDiscardReturn(CrossThreadFlags,0x80);
+					RtlInterlockedSetBitsDiscardReturn(CrossThreadFlags, 0x80);
 				}
 			}
 			else {
@@ -346,15 +346,15 @@ VOID  DbgkCreateThread(
 
 			CreateProcessArgs = &m.u.CreateProcessInfo;
 			CreateProcessArgs->SubSystemKey = 0;
-			CreateProcessArgs->FileHandle = DbgkpSectionToFileHandle((PVOID)*(PULONG64)GetProcess_SectionObject(Process));
-			CreateProcessArgs->BaseOfImage = (PVOID)*(PULONG64)GetProcess_SectionBaseAddress(Process);
+			CreateProcessArgs->FileHandle = DbgkpSectionToFileHandle((PVOID) * (PULONG64)GetProcess_SectionObject(Process));
+			CreateProcessArgs->BaseOfImage = (PVOID) * (PULONG64)GetProcess_SectionBaseAddress(Process);
 			CreateThreadArgs->StartAddress = NULL;
 			CreateProcessArgs->DebugInfoFileOffset = 0;
 			CreateProcessArgs->DebugInfoSize = 0;
 
 			__try
 			{
-				NtHeaders = RtlImageNtHeader((PVOID)*(PULONG64)GetProcess_SectionBaseAddress(Process));
+				NtHeaders = RtlImageNtHeader((PVOID) * (PULONG64)GetProcess_SectionBaseAddress(Process));
 				if (NtHeaders)
 				{
 					if (PsGetProcessWow64Process(Process) != NULL)
@@ -384,7 +384,7 @@ VOID  DbgkCreateThread(
 #else
 			DbgkpSendApiMessage(Process, FALSE, &m);
 #endif
-			
+
 			if (CreateProcessArgs->FileHandle != NULL) {
 				ObCloseHandle(CreateProcessArgs->FileHandle, KernelMode);
 			}
@@ -394,7 +394,7 @@ VOID  DbgkCreateThread(
 		{
 			CreateThreadArgs = &m.u.CreateThread;
 			CreateThreadArgs->SubSystemKey = 0;
-			CreateThreadArgs->StartAddress = (PVOID)*(PULONG64)GetThread_StartAddress(Thread);
+			CreateThreadArgs->StartAddress = (PVOID) * (PULONG64)GetThread_StartAddress(Thread);
 
 			m.h.u1.Length = 0x400018;
 			m.h.u2.ZeroInit = 8;
@@ -405,7 +405,7 @@ VOID  DbgkCreateThread(
 #else
 			DbgkpSendApiMessage(Process, TRUE, &m);
 #endif
-			
+
 		}
 	}
 
@@ -447,29 +447,29 @@ NTSTATUS DbgkpQueueMessage(
 
 		ExAcquireFastMutex(DbgkpProcessDebugPortMutex);
 
-		KIRQL OldIrql = {0};
+		KIRQL OldIrql = { 0 };
 		KeAcquireSpinLock(&g_DebugLock, &OldIrql);
 		for (PLIST_ENTRY pListEntry = g_Debuginfo.List.Flink; pListEntry != &g_Debuginfo.List; pListEntry = pListEntry->Flink)
 		{
 			PDebugInfomation pDebuginfo = CONTAINING_RECORD(pListEntry, DebugInfomation, List);
 			//if (pDebuginfo->SourceProcessId == PsGetCurrentProcessId() || pDebuginfo->TargetProcessId == PsGetCurrentProcessId())
-			if(pDebuginfo->TargetProcessId == PsGetProcessId(Process))
+			if (pDebuginfo->TargetProcessId == PsGetProcessId(Process))
 			{
 				DebugObject = pDebuginfo->DebugObject;
 				break;
 			}
 		}
-		KeReleaseSpinLock(&g_DebugLock, OldIrql);			 
+		KeReleaseSpinLock(&g_DebugLock, OldIrql);
 
 		PVOID CrossThreadFlags = GetThread_CrossThreadFlags(Thread);
 		if (ApiMsg->ApiNumber == DbgKmCreateThreadApi || ApiMsg->ApiNumber == DbgKmCreateProcessApi) {
-			if (*(PULONG)(CrossThreadFlags) & PS_CROSS_THREAD_FLAGS_SKIP_CREATION_MSG) {
+			if (*(PULONG)(CrossThreadFlags)& PS_CROSS_THREAD_FLAGS_SKIP_CREATION_MSG) {
 				DebugObject = NULL;
 			}
 		}
 
 		if (ApiMsg->ApiNumber == DbgKmExitThreadApi || ApiMsg->ApiNumber == DbgKmExitProcessApi) {
-			if (*(PULONG)(CrossThreadFlags) & PS_CROSS_THREAD_FLAGS_SKIP_TERMINATION_MSG) {
+			if (*(PULONG)(CrossThreadFlags)& PS_CROSS_THREAD_FLAGS_SKIP_TERMINATION_MSG) {
 				DebugObject = NULL;
 			}
 		}
@@ -595,7 +595,7 @@ BOOLEAN  DbgkForwardException(
 #else
 		st = DbgkpSendApiMessage(PsGetThreadProcess(KeGetCurrentThread()), DebugException, &m);
 #endif
-		 
+
 	}
 	else if (ExceptionPort) {
 
@@ -826,12 +826,12 @@ NTSTATUS  NtDebugActiveProcess(
 		PEX_RUNDOWN_REF RundownProtect = (PEX_RUNDOWN_REF)GetProcess_RundownProtect(Process);
 		if (ExAcquireRundownProtection(RundownProtect))
 		{
-		status = DbgkpPostFakeProcessCreateMessages(Process, DebugObject, (PETHREAD*)& LastThread);
-		status = DbgkpSetProcessDebugObject((PEPROCESS)Process, DebugObject, status, (PETHREAD)LastThread);
-		ExReleaseRundownProtection(RundownProtect);
+			status = DbgkpPostFakeProcessCreateMessages(Process, DebugObject, (PETHREAD*)& LastThread);
+			status = DbgkpSetProcessDebugObject((PEPROCESS)Process, DebugObject, status, (PETHREAD)LastThread);
+			ExReleaseRundownProtection(RundownProtect);
 		}
 		else {
-		status = STATUS_PROCESS_IS_TERMINATING;
+			status = STATUS_PROCESS_IS_TERMINATING;
 		}
 	}
 
@@ -1017,7 +1017,5 @@ NTSTATUS NtTerminateProcess(
 			ObDereferenceObject(Process);
 	}
 
-	return OrignalNtTerminateProcess(ProcessHandle,ExitStatus);
+	return OrignalNtTerminateProcess(ProcessHandle, ExitStatus);
 }
-
-
